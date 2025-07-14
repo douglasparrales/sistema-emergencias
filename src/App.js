@@ -6,9 +6,11 @@ import FuenteAlertas from './pages/FuenteAlertas';
 import GestionVoluntarios from './pages/GestionVoluntarios';
 import CentroAyuda from './pages/CentroAyuda';
 import MapaZonas from './pages/MapaZonas';
+import AccesibilidadMenu from './components/AccesibilidadMenu';
 
 const App = () => {
   const [usuarioLogueado, setUsuarioLogueado] = useState(null);
+  const [mostrarAccesibilidad, setMostrarAccesibilidad] = useState(false);
 
   const handleLogin = (usuario) => {
     setUsuarioLogueado(usuario);
@@ -20,15 +22,23 @@ const App = () => {
 
   return (
     <Router>
-      <Navbar usuario={usuarioLogueado} onLogin={handleLogin} onLogout={handleLogout} />
-      <div style={{ padding: '20px' }}>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/fuente-alertas" element={<FuenteAlertas />} />
-          <Route path="/gestion-voluntarios" element={<GestionVoluntarios />} />
-          <Route path="/centro-ayuda" element={<CentroAyuda />} />
-          <Route path="/zonas-seguras" element={<MapaZonas />} />
-        </Routes>
+      <div id="accesibilidad-contenedor">
+        <Navbar
+          usuario={usuarioLogueado}
+          onLogin={handleLogin}
+          onLogout={handleLogout}
+          toggleAccMenu={() => setMostrarAccesibilidad(prev => !prev)}
+        />
+        <AccesibilidadMenu mostrar={mostrarAccesibilidad} />
+        <div style={{ padding: '20px' }}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/fuente-alertas" element={<FuenteAlertas />} />
+            <Route path="/gestion-voluntarios" element={<GestionVoluntarios />} />
+            <Route path="/centro-ayuda" element={<CentroAyuda />} />
+            <Route path="/zonas-seguras" element={<MapaZonas />} />
+          </Routes>
+        </div>
       </div>
     </Router>
   );

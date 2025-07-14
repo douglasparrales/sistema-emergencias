@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import Login from '../pages/Login'; // tu formulario Login
+import Login from '../pages/Login';
 import './Navbar.css';
+import { Accessibility } from "lucide-react";
 
-const Navbar = ({ usuario, onLogin, onLogout }) => {
+const Navbar = ({ usuario, onLogin, onLogout, toggleAccMenu }) => {
   const location = useLocation();
   const [showLogin, setShowLogin] = useState(false);
 
-  const isActive = (path) => location.pathname === path ? 'active-link' : '';
+  const isActive = (path) => (location.pathname === path ? 'active-link' : '');
 
   const handleLoginClick = () => setShowLogin(true);
   const handleCloseLogin = () => setShowLogin(false);
@@ -40,6 +41,31 @@ const Navbar = ({ usuario, onLogin, onLogout }) => {
           )}
         </div>
       </nav>
+
+      {/* Botón de accesibilidad flotante */}
+      <button
+        onClick={toggleAccMenu}
+        style={{
+          backgroundColor: "#4caf50",
+          border: "none",
+          borderRadius: "50%",
+          width: "50px",
+          height: "50px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          position: "fixed",
+          bottom: "20px",  // Lo colocamos abajo para no tapar menú (que está a bottom: 80px)
+          right: "20px",
+          zIndex: 1100,
+          boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+        }}
+        title="Opciones de accesibilidad"
+        aria-label="Abrir menú de accesibilidad"
+      >
+        <Accessibility color="white" size={24} />
+      </button>
 
       {showLogin && (
         <div className="login-modal">
