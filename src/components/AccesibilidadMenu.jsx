@@ -2,27 +2,40 @@ import React, { useEffect, useState } from "react";
 
 const AccesibilidadMenu = ({ mostrar }) => {
   const [altoContraste, setAltoContraste] = useState(false);
-  const [tamañoTexto, setTamañoTexto] = useState(100); // porcentaje base 100%
+  const [contrasteSuave, setContrasteSuave] = useState(false);
+  const [modoSepia, setModoSepia] = useState(false);
+  const [tamañoTexto, setTamañoTexto] = useState(100);
+  const [interlineado, setInterlineado] = useState(1.5);
   const [resaltarFoco, setResaltarFoco] = useState(false);
-  // Nuevas opciones para discapacidad auditiva
-  const [subtitulosCerrados, setSubtitulosCerrados] = useState(false);
+  const [fuenteDislexia, setFuenteDislexia] = useState(false);
   const [alertasVisuales, setAlertasVisuales] = useState(false);
+  const [mostrarInstruccionesTeclado, setMostrarInstruccionesTeclado] = useState(false);
+  const [modoLecturaFacil, setModoLecturaFacil] = useState(false);
 
-  // Aplicar/remover modo contraste globalmente (permanece activo aunque el menú esté oculto)
+  // Manejar modos de contraste mutuamente excluyentes
   useEffect(() => {
     if (altoContraste) {
       document.body.classList.add("modo-contraste");
+      document.body.classList.remove("contraste-suave", "modo-sepia");
+    } else if (contrasteSuave) {
+      document.body.classList.add("contraste-suave");
+      document.body.classList.remove("modo-contraste", "modo-sepia");
+    } else if (modoSepia) {
+      document.body.classList.add("modo-sepia");
+      document.body.classList.remove("modo-contraste", "contraste-suave");
     } else {
-      document.body.classList.remove("modo-contraste");
+      document.body.classList.remove("modo-contraste", "contraste-suave", "modo-sepia");
     }
-  }, [altoContraste]);
+  }, [altoContraste, contrasteSuave, modoSepia]);
 
-  // Cambiar tamaño de texto global
   useEffect(() => {
     document.body.style.fontSize = `${tamañoTexto}%`;
   }, [tamañoTexto]);
 
-  // Resaltar foco global
+  useEffect(() => {
+    document.body.style.lineHeight = interlineado;
+  }, [interlineado]);
+
   useEffect(() => {
     if (resaltarFoco) {
       document.body.classList.add("resaltar-foco");
@@ -31,16 +44,31 @@ const AccesibilidadMenu = ({ mostrar }) => {
     }
   }, [resaltarFoco]);
 
-  // Alertas visuales global (puedes personalizar el efecto)
+  useEffect(() => {
+    if (fuenteDislexia) {
+      document.body.classList.add("fuente-dislexia");
+    } else {
+      document.body.classList.remove("fuente-dislexia");
+    }
+  }, [fuenteDislexia]);
+
   useEffect(() => {
     if (alertasVisuales) {
-      document.body.classList.add("alertas-visuales");
+      // Aquí podrías agregar código para activar alertas visuales (ejemplo: cambiar sonidos por iconos)
+      console.log("Alertas visuales activadas");
     } else {
-      document.body.classList.remove("alertas-visuales");
+      console.log("Alertas visuales desactivadas");
     }
   }, [alertasVisuales]);
 
-  // No renderizar menú si mostrar es false
+  useEffect(() => {
+    if (modoLecturaFacil) {
+      document.body.classList.add("modo-lectura-facil");
+    } else {
+      document.body.classList.remove("modo-lectura-facil");
+    }
+  }, [modoLecturaFacil]);
+
   if (!mostrar) return null;
 
   return (
@@ -48,35 +76,75 @@ const AccesibilidadMenu = ({ mostrar }) => {
       id="menu-accesibilidad"
       style={{
         position: "fixed",
-        bottom: "80px",       // Fijo abajo para que siempre esté visible aunque scroll
+        bottom: "80px",
         right: "20px",
         backgroundColor: "#fff",
         border: "2px solid #4caf50",
         borderRadius: "8px",
         padding: "1rem",
         width: "320px",
-        maxHeight: "70vh",
-        overflowY: "auto",
         boxShadow: "0 0 10px rgba(0,0,0,0.2)",
         zIndex: 1500,
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        maxHeight: "90vh",
+        overflowY: "auto"
       }}
       aria-label="Opciones de accesibilidad"
       role="region"
     >
       <h3 style={{ marginTop: 0, color: "#4caf50" }}>Opciones de Accesibilidad</h3>
 
-      {/* Opciones discapacidad visual */}
-      <label style={{ display: "block", marginBottom: "10px", cursor: "pointer" }}>
-        <input
-          type="checkbox"
-          checked={altoContraste}
-          onChange={() => setAltoContraste(!altoContraste)}
-          style={{ marginRight: "8px" }}
-        />
-        Modo Alto Contraste
-      </label>
+      {/* Modos de contraste */}
+      <fieldset style={{ marginBottom: "10px" }}>
+        <legend style={{ fontWeight: "600" }}>Contraste</legend>
+        <label style={{ display: "block", cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={altoContraste}
+            onChange={() => {
+              setAltoContraste(!altoContraste);
+              if (!altoContraste) {
+                setContrasteSuave(false);
+                setModoSepia(false);
+              }
+            }}
+            style={{ marginRight: "8px" }}
+          />
+          Alto Contraste
+        </label>
+        <label style={{ display: "block", cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={contrasteSuave}
+            onChange={() => {
+              setContrasteSuave(!contrasteSuave);
+              if (!contrasteSuave) {
+                setAltoContraste(false);
+                setModoSepia(false);
+              }
+            }}
+            style={{ marginRight: "8px" }}
+          />
+          Contraste Suave
+        </label>
+        <label style={{ display: "block", cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={modoSepia}
+            onChange={() => {
+              setModoSepia(!modoSepia);
+              if (!modoSepia) {
+                setAltoContraste(false);
+                setContrasteSuave(false);
+              }
+            }}
+            style={{ marginRight: "8px" }}
+          />
+          Modo Sepia
+        </label>
+      </fieldset>
 
+      {/* Tamaño de texto */}
       <div style={{ marginBottom: "10px" }}>
         <label htmlFor="tamañoTexto" style={{ display: "block", marginBottom: "4px" }}>
           Tamaño de Texto: {tamañoTexto}%
@@ -92,7 +160,25 @@ const AccesibilidadMenu = ({ mostrar }) => {
         />
       </div>
 
-      <label style={{ display: "block", marginBottom: "20px", cursor: "pointer" }}>
+      {/* Interlineado */}
+      <div style={{ marginBottom: "10px" }}>
+        <label htmlFor="interlineado" style={{ display: "block", marginBottom: "4px" }}>
+          Espacio entre líneas: {interlineado.toFixed(1)}
+        </label>
+        <input
+          type="range"
+          id="interlineado"
+          min="1"
+          max="3"
+          step="0.1"
+          value={interlineado}
+          onChange={(e) => setInterlineado(Number(e.target.value))}
+          style={{ width: "100%" }}
+        />
+      </div>
+
+      {/* Resaltar foco */}
+      <label style={{ display: "block", marginBottom: "10px", cursor: "pointer" }}>
         <input
           type="checkbox"
           checked={resaltarFoco}
@@ -102,19 +188,18 @@ const AccesibilidadMenu = ({ mostrar }) => {
         Resaltar Foco y Enlaces
       </label>
 
-      {/* Opciones discapacidad auditiva */}
-      <h4 style={{ color: "#388e3c", marginBottom: "10px" }}>Opciones para discapacidad auditiva</h4>
-
+      {/* Fuente para dislexia */}
       <label style={{ display: "block", marginBottom: "10px", cursor: "pointer" }}>
         <input
           type="checkbox"
-          checked={subtitulosCerrados}
-          onChange={() => setSubtitulosCerrados(!subtitulosCerrados)}
+          checked={fuenteDislexia}
+          onChange={() => setFuenteDislexia(!fuenteDislexia)}
           style={{ marginRight: "8px" }}
         />
-        Subtítulos cerrados (videos)
+        Fuente amigable para Dislexia
       </label>
 
+      {/* Alertas visuales en lugar de sonidos */}
       <label style={{ display: "block", marginBottom: "10px", cursor: "pointer" }}>
         <input
           type="checkbox"
@@ -122,13 +207,62 @@ const AccesibilidadMenu = ({ mostrar }) => {
           onChange={() => setAlertasVisuales(!alertasVisuales)}
           style={{ marginRight: "8px" }}
         />
-        Alertas visuales alternativas
+        Alertas visuales alternativas (sin sonido)
       </label>
 
-      <div style={{ fontSize: "0.9rem", color: "#555", marginTop: "1rem" }}>
-        <p><strong>Navegación por teclado:</strong> Use Tab para moverse.</p>
-        <p><strong>Lector de pantalla:</strong> Use el lector predeterminado del sistema.</p>
-      </div>
+      {/* Modo lectura fácil */}
+      <label style={{ display: "block", marginBottom: "10px", cursor: "pointer" }}>
+        <input
+          type="checkbox"
+          checked={modoLecturaFacil}
+          onChange={() => setModoLecturaFacil(!modoLecturaFacil)}
+          style={{ marginRight: "8px" }}
+        />
+        Modo Lectura Fácil
+      </label>
+
+      {/* Mostrar instrucciones navegación por teclado */}
+      <button
+        type="button"
+        onClick={() => setMostrarInstruccionesTeclado(!mostrarInstruccionesTeclado)}
+        style={{
+          marginTop: "15px",
+          width: "100%",
+          padding: "8px",
+          backgroundColor: "#4caf50",
+          border: "none",
+          borderRadius: "4px",
+          color: "#fff",
+          fontWeight: "600",
+          cursor: "pointer",
+        }}
+        aria-expanded={mostrarInstruccionesTeclado}
+      >
+        {mostrarInstruccionesTeclado ? "Ocultar instrucciones teclado" : "Mostrar instrucciones teclado"}
+      </button>
+
+      {mostrarInstruccionesTeclado && (
+        <div
+          style={{
+            marginTop: "10px",
+            padding: "10px",
+            backgroundColor: "#e8f5e9",
+            borderRadius: "4px",
+            fontSize: "0.9rem",
+            color: "#2e7d32",
+          }}
+          role="region"
+          aria-live="polite"
+        >
+          <p><strong>Navegación por teclado:</strong></p>
+          <ul>
+            <li>Tab: mover al siguiente elemento</li>
+            <li>Shift + Tab: mover al elemento anterior</li>
+            <li>Enter o Espacio: activar botón o enlace</li>
+            <li>Flechas: navegar dentro de menús o listas</li>
+          </ul>
+        </div>
+      )}
 
       <style>{`
         .modo-contraste {
@@ -136,20 +270,24 @@ const AccesibilidadMenu = ({ mostrar }) => {
           color: #fff !important;
           filter: invert(1) hue-rotate(180deg);
         }
-        .modo-contraste #menu-accesibilidad {
-          filter: invert(1) hue-rotate(180deg);
+        .contraste-suave {
+          filter: contrast(1.5);
+        }
+        .modo-sepia {
+          filter: sepia(0.6);
+        }
+        .modo-lectura-facil {
+          font-size: 1.1rem !important;
+          line-height: 1.8 !important;
+          font-weight: 400 !important;
+          letter-spacing: 0.05em !important;
         }
         .resaltar-foco *:focus {
           outline: 3px solid #4caf50 !important;
           outline-offset: 3px;
         }
-        .alertas-visuales {
-          outline: 4px dashed #f44336;
-          animation: parpadeo 1.5s infinite;
-        }
-        @keyframes parpadeo {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+        .fuente-dislexia {
+          font-family: "OpenDyslexic", Arial, sans-serif !important;
         }
       `}</style>
     </div>
