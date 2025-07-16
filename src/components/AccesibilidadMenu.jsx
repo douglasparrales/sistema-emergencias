@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
+import "./AccesibilidadMenu.css";
+import { Accessibility } from "lucide-react";
 
-const AccesibilidadMenu = ({ mostrar }) => {
+const AccesibilidadMenu = () => {
+  const [mostrarMenu, setMostrarMenu] = useState(false);
   const [altoContraste, setAltoContraste] = useState(false);
   const [contrasteSuave, setContrasteSuave] = useState(false);
   const [modoSepia, setModoSepia] = useState(false);
@@ -11,8 +14,11 @@ const AccesibilidadMenu = ({ mostrar }) => {
   const [alertasVisuales, setAlertasVisuales] = useState(false);
   const [mostrarInstruccionesTeclado, setMostrarInstruccionesTeclado] = useState(false);
   const [modoLecturaFacil, setModoLecturaFacil] = useState(false);
+  const [zoomActivado, setZoomActivado] = useState(false);
+  const [pausarAnimaciones, setPausarAnimaciones] = useState(false);
+  const [lectorPantalla, setLectorPantalla] = useState(false);
+  const [descripcionAudio, setDescripcionAudio] = useState(false);
 
-  // Manejar modos de contraste mutuamente excluyentes
   useEffect(() => {
     if (altoContraste) {
       document.body.classList.add("modo-contraste");
@@ -53,13 +59,33 @@ const AccesibilidadMenu = ({ mostrar }) => {
   }, [fuenteDislexia]);
 
   useEffect(() => {
-    if (alertasVisuales) {
-      // Aquí podrías agregar código para activar alertas visuales (ejemplo: cambiar sonidos por iconos)
-      console.log("Alertas visuales activadas");
+    document.body.style.zoom = zoomActivado ? "120%" : "100%";
+  }, [zoomActivado]);
+
+  useEffect(() => {
+    if (pausarAnimaciones) {
+      document.body.classList.add("pausar-animaciones");
     } else {
-      console.log("Alertas visuales desactivadas");
+      document.body.classList.remove("pausar-animaciones");
     }
-  }, [alertasVisuales]);
+  }, [pausarAnimaciones]);
+
+  useEffect(() => {
+    if (lectorPantalla) {
+      const texto = document.body.innerText;
+      const speech = new SpeechSynthesisUtterance(texto);
+      speech.lang = "es-ES";
+      window.speechSynthesis.speak(speech);
+    } else {
+      window.speechSynthesis.cancel();
+    }
+  }, [lectorPantalla]);
+
+  useEffect(() => {
+    if (descripcionAudio) {
+      alert("Descripción de audio activada (placeholder)");
+    }
+  }, [descripcionAudio]);
 
   useEffect(() => {
     if (modoLecturaFacil) {
@@ -69,228 +95,89 @@ const AccesibilidadMenu = ({ mostrar }) => {
     }
   }, [modoLecturaFacil]);
 
-  if (!mostrar) return null;
-
   return (
-    <div
-      id="menu-accesibilidad"
-      style={{
-        position: "fixed",
-        bottom: "80px",
-        right: "20px",
-        backgroundColor: "#fff",
-        border: "2px solid #4caf50",
-        borderRadius: "8px",
-        padding: "1rem",
-        width: "320px",
-        boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-        zIndex: 1500,
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        maxHeight: "90vh",
-        overflowY: "auto"
-      }}
-      aria-label="Opciones de accesibilidad"
-      role="region"
-    >
-      <h3 style={{ marginTop: 0, color: "#4caf50" }}>Opciones de Accesibilidad</h3>
-
-      {/* Modos de contraste */}
-      <fieldset style={{ marginBottom: "10px" }}>
-        <legend style={{ fontWeight: "600" }}>Contraste</legend>
-        <label style={{ display: "block", cursor: "pointer" }}>
-          <input
-            type="checkbox"
-            checked={altoContraste}
-            onChange={() => {
-              setAltoContraste(!altoContraste);
-              if (!altoContraste) {
-                setContrasteSuave(false);
-                setModoSepia(false);
-              }
-            }}
-            style={{ marginRight: "8px" }}
-          />
-          Alto Contraste
-        </label>
-        <label style={{ display: "block", cursor: "pointer" }}>
-          <input
-            type="checkbox"
-            checked={contrasteSuave}
-            onChange={() => {
-              setContrasteSuave(!contrasteSuave);
-              if (!contrasteSuave) {
-                setAltoContraste(false);
-                setModoSepia(false);
-              }
-            }}
-            style={{ marginRight: "8px" }}
-          />
-          Contraste Suave
-        </label>
-        <label style={{ display: "block", cursor: "pointer" }}>
-          <input
-            type="checkbox"
-            checked={modoSepia}
-            onChange={() => {
-              setModoSepia(!modoSepia);
-              if (!modoSepia) {
-                setAltoContraste(false);
-                setContrasteSuave(false);
-              }
-            }}
-            style={{ marginRight: "8px" }}
-          />
-          Modo Sepia
-        </label>
-      </fieldset>
-
-      {/* Tamaño de texto */}
-      <div style={{ marginBottom: "10px" }}>
-        <label htmlFor="tamañoTexto" style={{ display: "block", marginBottom: "4px" }}>
-          Tamaño de Texto: {tamañoTexto}%
-        </label>
-        <input
-          type="range"
-          id="tamañoTexto"
-          min="75"
-          max="150"
-          value={tamañoTexto}
-          onChange={(e) => setTamañoTexto(Number(e.target.value))}
-          style={{ width: "100%" }}
-        />
-      </div>
-
-      {/* Interlineado */}
-      <div style={{ marginBottom: "10px" }}>
-        <label htmlFor="interlineado" style={{ display: "block", marginBottom: "4px" }}>
-          Espacio entre líneas: {interlineado.toFixed(1)}
-        </label>
-        <input
-          type="range"
-          id="interlineado"
-          min="1"
-          max="3"
-          step="0.1"
-          value={interlineado}
-          onChange={(e) => setInterlineado(Number(e.target.value))}
-          style={{ width: "100%" }}
-        />
-      </div>
-
-      {/* Resaltar foco */}
-      <label style={{ display: "block", marginBottom: "10px", cursor: "pointer" }}>
-        <input
-          type="checkbox"
-          checked={resaltarFoco}
-          onChange={() => setResaltarFoco(!resaltarFoco)}
-          style={{ marginRight: "8px" }}
-        />
-        Resaltar Foco y Enlaces
-      </label>
-
-      {/* Fuente para dislexia */}
-      <label style={{ display: "block", marginBottom: "10px", cursor: "pointer" }}>
-        <input
-          type="checkbox"
-          checked={fuenteDislexia}
-          onChange={() => setFuenteDislexia(!fuenteDislexia)}
-          style={{ marginRight: "8px" }}
-        />
-        Fuente amigable para Dislexia
-      </label>
-
-      {/* Alertas visuales en lugar de sonidos */}
-      <label style={{ display: "block", marginBottom: "10px", cursor: "pointer" }}>
-        <input
-          type="checkbox"
-          checked={alertasVisuales}
-          onChange={() => setAlertasVisuales(!alertasVisuales)}
-          style={{ marginRight: "8px" }}
-        />
-        Alertas visuales alternativas (sin sonido)
-      </label>
-
-      {/* Modo lectura fácil */}
-      <label style={{ display: "block", marginBottom: "10px", cursor: "pointer" }}>
-        <input
-          type="checkbox"
-          checked={modoLecturaFacil}
-          onChange={() => setModoLecturaFacil(!modoLecturaFacil)}
-          style={{ marginRight: "8px" }}
-        />
-        Modo Lectura Fácil
-      </label>
-
-      {/* Mostrar instrucciones navegación por teclado */}
-      <button
-        type="button"
-        onClick={() => setMostrarInstruccionesTeclado(!mostrarInstruccionesTeclado)}
+    <>
+      {/* Botón importado de Navbar */}
+      <div
+        onClick={() => setMostrarMenu(!mostrarMenu)}
         style={{
-          marginTop: "15px",
-          width: "100%",
-          padding: "8px",
-          backgroundColor: "#4caf50",
+          backgroundColor: "#25D366",
           border: "none",
-          borderRadius: "4px",
-          color: "#fff",
-          fontWeight: "600",
+          borderRadius: "50%",
+          width: "50px",
+          height: "50px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           cursor: "pointer",
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          zIndex: 1100,
+          boxShadow: "0 4px 8px rgba(0,0,0,0.3)"
         }}
-        aria-expanded={mostrarInstruccionesTeclado}
+        title="Opciones de accesibilidad"
+        aria-label="Abrir menú de accesibilidad"
       >
-        {mostrarInstruccionesTeclado ? "Ocultar instrucciones teclado" : "Mostrar instrucciones teclado"}
-      </button>
+        <Accessibility color="white" size={24} />
+      </div>
 
-      {mostrarInstruccionesTeclado && (
-        <div
-          style={{
-            marginTop: "10px",
-            padding: "10px",
-            backgroundColor: "#e8f5e9",
-            borderRadius: "4px",
-            fontSize: "0.9rem",
-            color: "#2e7d32",
-          }}
-          role="region"
-          aria-live="polite"
-        >
-          <p><strong>Navegación por teclado:</strong></p>
-          <ul>
-            <li>Tab: mover al siguiente elemento</li>
-            <li>Shift + Tab: mover al elemento anterior</li>
-            <li>Enter o Espacio: activar botón o enlace</li>
-            <li>Flechas: navegar dentro de menús o listas</li>
-          </ul>
+      {mostrarMenu && (
+        <div className="menu-accesibilidad" role="dialog" aria-label="Opciones de accesibilidad">
+          <div className="menu-header">
+            <h3>Opciones de Accesibilidad</h3>
+            <button className="btn-cerrar" onClick={() => setMostrarMenu(false)}>✖</button>
+          </div>
+
+          <fieldset>
+            <legend>Contraste</legend>
+            <label><input type="checkbox" checked={altoContraste} onChange={() => { setAltoContraste(!altoContraste); setContrasteSuave(false); setModoSepia(false); }} /> Alto Contraste</label>
+            <label><input type="checkbox" checked={contrasteSuave} onChange={() => { setContrasteSuave(!contrasteSuave); setAltoContraste(false); setModoSepia(false); }} /> Contraste Suave</label>
+            <label><input type="checkbox" checked={modoSepia} onChange={() => { setModoSepia(!modoSepia); setAltoContraste(false); setContrasteSuave(false); }} /> Modo Sepia</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Texto</legend>
+            <label>Tamaño: {tamañoTexto}%
+              <input type="range" min="75" max="150" value={tamañoTexto} onChange={e => setTamañoTexto(Number(e.target.value))} />
+            </label>
+            <label>Interlineado: {interlineado.toFixed(1)}
+              <input type="range" min="1" max="3" step="0.1" value={interlineado} onChange={e => setInterlineado(Number(e.target.value))} />
+            </label>
+            <label><input type="checkbox" checked={fuenteDislexia} onChange={() => setFuenteDislexia(!fuenteDislexia)} /> Fuente Dislexia</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Visualización</legend>
+            <label><input type="checkbox" checked={resaltarFoco} onChange={() => setResaltarFoco(!resaltarFoco)} /> Resaltar Foco</label>
+            <label><input type="checkbox" checked={zoomActivado} onChange={() => setZoomActivado(!zoomActivado)} /> Zoom</label>
+            <label><input type="checkbox" checked={modoLecturaFacil} onChange={() => setModoLecturaFacil(!modoLecturaFacil)} /> Lectura Fácil</label>
+            <label><input type="checkbox" checked={pausarAnimaciones} onChange={() => setPausarAnimaciones(!pausarAnimaciones)} /> Pausar Animaciones</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Audio y Ayuda</legend>
+            <label><input type="checkbox" checked={lectorPantalla} onChange={() => setLectorPantalla(!lectorPantalla)} /> Lector de Pantalla</label>
+            <label><input type="checkbox" checked={descripcionAudio} onChange={() => setDescripcionAudio(!descripcionAudio)} /> Descripción de Audio</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Teclado</legend>
+            <button type="button" onClick={() => setMostrarInstruccionesTeclado(!mostrarInstruccionesTeclado)}>
+              {mostrarInstruccionesTeclado ? "Ocultar instrucciones" : "Mostrar instrucciones"}
+            </button>
+            {mostrarInstruccionesTeclado && (
+              <ul className="teclado-ayuda">
+                <li><kbd>Tab</kbd>: siguiente elemento</li>
+                <li><kbd>Shift + Tab</kbd>: anterior</li>
+                <li><kbd>Enter</kbd>: activar</li>
+                <li><kbd>Flechas</kbd>: navegar</li>
+              </ul>
+            )}
+          </fieldset>
         </div>
       )}
-
-      <style>{`
-        .modo-contraste {
-          background-color: #000 !important;
-          color: #fff !important;
-          filter: invert(1) hue-rotate(180deg);
-        }
-        .contraste-suave {
-          filter: contrast(1.5);
-        }
-        .modo-sepia {
-          filter: sepia(0.6);
-        }
-        .modo-lectura-facil {
-          font-size: 1.1rem !important;
-          line-height: 1.8 !important;
-          font-weight: 400 !important;
-          letter-spacing: 0.05em !important;
-        }
-        .resaltar-foco *:focus {
-          outline: 3px solid #4caf50 !important;
-          outline-offset: 3px;
-        }
-        .fuente-dislexia {
-          font-family: "OpenDyslexic", Arial, sans-serif !important;
-        }
-      `}</style>
-    </div>
+    </>
   );
 };
 

@@ -38,3 +38,37 @@
     transform: rotate(360deg);
   }
 }
+.modo-contraste {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+.contraste-suave {
+  background-color: #f4f4f4 !important;
+  color: #000 !important;
+}
+
+.modo-sepia {
+  background-color: #f5e9d3 !important;
+  color: #5b4636 !important;
+}
+
+.resaltar-foco *:focus {
+  outline: 3px solid #ff0 !important;
+}
+
+.fuente-dislexia {
+  font-family: "OpenDyslexic", Arial, sans-serif !important;
+}
+
+.modo-lectura-facil {
+  letter-spacing: 1.5px;
+  word-spacing: 4px;
+  font-size: 1.2em;
+}
+
+.pausar-animaciones * {
+  animation: none !important;
+  transition: none !important;
+}
+
