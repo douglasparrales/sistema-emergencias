@@ -18,6 +18,10 @@ const AccesibilidadMenu = () => {
   const [pausarAnimaciones, setPausarAnimaciones] = useState(false);
   const [lectorPantalla, setLectorPantalla] = useState(false);
   const [descripcionAudio, setDescripcionAudio] = useState(false);
+  const [controlesAudio, setControlesAudio] = useState(true);
+  const [subtitulosCerrados, setSubtitulosCerrados] = useState(true);
+  const [subtitulosEnVivo, setSubtitulosEnVivo] = useState(false);
+  const [transcripcion, setTranscripcion] = useState(false);
 
   useEffect(() => {
     if (altoContraste) {
@@ -88,6 +92,25 @@ const AccesibilidadMenu = () => {
   }, [descripcionAudio]);
 
   useEffect(() => {
+    if (alertasVisuales) {
+      const divAlerta = document.createElement('div');
+      divAlerta.innerText = '🔕 Sonido desactivado. Mira el mensaje en pantalla.';
+      divAlerta.style.position = 'fixed';
+      divAlerta.style.bottom = '100px';
+      divAlerta.style.right = '20px';
+      divAlerta.style.padding = '1rem';
+      divAlerta.style.backgroundColor = '#f44336';
+      divAlerta.style.color = 'white';
+      divAlerta.style.zIndex = 9999;
+      divAlerta.style.borderRadius = '10px';
+      document.body.appendChild(divAlerta);
+      setTimeout(() => {
+        divAlerta.remove();
+      }, 5000);
+    }
+  }, [alertasVisuales]);
+
+  useEffect(() => {
     if (modoLecturaFacil) {
       document.body.classList.add("modo-lectura-facil");
     } else {
@@ -97,7 +120,6 @@ const AccesibilidadMenu = () => {
 
   return (
     <>
-      {/* Botón importado de Navbar */}
       <div
         onClick={() => setMostrarMenu(!mostrarMenu)}
         style={{
@@ -153,10 +175,15 @@ const AccesibilidadMenu = () => {
             <label><input type="checkbox" checked={zoomActivado} onChange={() => setZoomActivado(!zoomActivado)} /> Zoom</label>
             <label><input type="checkbox" checked={modoLecturaFacil} onChange={() => setModoLecturaFacil(!modoLecturaFacil)} /> Lectura Fácil</label>
             <label><input type="checkbox" checked={pausarAnimaciones} onChange={() => setPausarAnimaciones(!pausarAnimaciones)} /> Pausar Animaciones</label>
+            <label><input type="checkbox" checked={alertasVisuales} onChange={() => setAlertasVisuales(!alertasVisuales)} /> Alertas Visuales</label>
           </fieldset>
 
           <fieldset>
-            <legend>Audio y Ayuda</legend>
+            <legend>Audio y Multimedia</legend>
+            <label><input type="checkbox" checked={controlesAudio} onChange={() => setControlesAudio(!controlesAudio)} /> Controles de Audio</label>
+            <label><input type="checkbox" checked={subtitulosCerrados} onChange={() => setSubtitulosCerrados(!subtitulosCerrados)} /> Subtítulos Cerrados</label>
+            <label><input type="checkbox" checked={subtitulosEnVivo} onChange={() => setSubtitulosEnVivo(!subtitulosEnVivo)} /> Subtítulos en Vivo</label>
+            <label><input type="checkbox" checked={transcripcion} onChange={() => setTranscripcion(!transcripcion)} /> Transcripción Descargable</label>
             <label><input type="checkbox" checked={lectorPantalla} onChange={() => setLectorPantalla(!lectorPantalla)} /> Lector de Pantalla</label>
             <label><input type="checkbox" checked={descripcionAudio} onChange={() => setDescripcionAudio(!descripcionAudio)} /> Descripción de Audio</label>
           </fieldset>

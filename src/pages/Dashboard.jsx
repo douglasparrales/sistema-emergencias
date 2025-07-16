@@ -1,6 +1,16 @@
 import React from 'react';
+import './Dashboard.css';
 
-const Dashboard = () => {
+const Dashboard = ({ accessibility = {} }) => {
+
+  const { altoContraste, zoomActivado, subtitulosCerrados } = accessibility;
+
+  const videoContainerClass = `
+    video-container
+    ${accessibility.altoContraste ? 'contraste-alto' : ''}
+    ${accessibility.zoomActivado ? 'zoom-video' : ''}
+  `;
+
   return (
     <div style={{ fontFamily: 'Segoe UI, sans-serif', color: '#333' }}>
       <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -12,12 +22,46 @@ const Dashboard = () => {
         </p>
       </header>
 
-      <section style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <section style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
+
+        {/* Video informativo */}
+        <div style={{
+          backgroundColor: '#fff',
+          padding: '1.5rem',
+          borderRadius: '10px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          width: '50%'
+        }}>
+          <h2 style={{ marginBottom: '1rem', color: '#b71c1c' }}>🎥 Video informativo</h2>
+
+          <div className={videoContainerClass}>
+            <iframe
+              width="100%"
+              height="315"
+              src="https://www.youtube.com/embed/Kjuv88cLzRs"
+              title="Video de emergencia"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{ borderRadius: '8px' }}
+            ></iframe>
+          </div>
+
+          {subtitulosCerrados && (
+            <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
+              [Subtítulo simulado]: En caso de emergencia, mantén la calma y sigue las instrucciones oficiales.
+            </p>
+          )}
+        </div>
+
+
+        {/* Objetivos */}
         <div style={{
           backgroundColor: '#f8f8f8',
           padding: '1.5rem',
           borderRadius: '10px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          width: '80%'
         }}>
           <h2 style={{ marginBottom: '1rem', color: '#b71c1c' }}>🎯 Objetivos Principales</h2>
           <ul style={{ lineHeight: '1.7' }}>
@@ -28,11 +72,13 @@ const Dashboard = () => {
           </ul>
         </div>
 
+        {/* Noticias */}
         <div style={{
           backgroundColor: '#f1f1f1',
           padding: '1.5rem',
           borderRadius: '10px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          width: '80%'
         }}>
           <h2 style={{ marginBottom: '1rem', color: '#b71c1c' }}>📢 Noticias Relevantes</h2>
           <ul style={{ lineHeight: '1.7' }}>
@@ -42,11 +88,13 @@ const Dashboard = () => {
           </ul>
         </div>
 
+        {/* Beneficios */}
         <div style={{
           backgroundColor: '#fff8f8',
           padding: '1.5rem',
           borderRadius: '10px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          width: '80%'
         }}>
           <h2 style={{ marginBottom: '1rem', color: '#b71c1c' }}>🤝 ¿En qué te beneficia esta plataforma?</h2>
           <ul style={{ lineHeight: '1.7' }}>

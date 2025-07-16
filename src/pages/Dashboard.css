@@ -1,0 +1,10 @@
+.video-container.contraste-alto {
+  background-color: black !important;
+  color: white;
+  border: 2px solid yellow;
+}
+
+.video-container.zoom-video iframe {
+  transform: scale(1.1);
+  transform-origin: top left;
+}

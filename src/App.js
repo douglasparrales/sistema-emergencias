@@ -11,6 +11,10 @@ import AccesibilidadMenu from './components/AccesibilidadMenu';
 const App = () => {
   const [usuarioLogueado, setUsuarioLogueado] = useState(null);
   const [mostrarAccesibilidad, setMostrarAccesibilidad] = useState(false);
+  const [altoContraste, setAltoContraste] = useState(false);
+  const [zoomActivado, setZoomActivado] = useState(false);
+  const [subtitulosCerrados, setSubtitulosCerrados] = useState(false);
+
 
   const handleLogin = (usuario) => {
     setUsuarioLogueado(usuario);
@@ -29,10 +33,26 @@ const App = () => {
           onLogout={handleLogout}
           toggleAccMenu={() => setMostrarAccesibilidad(prev => !prev)}
         />
-        <AccesibilidadMenu mostrar={mostrarAccesibilidad} />
+        <AccesibilidadMenu
+          mostrar={mostrarAccesibilidad}
+          altoContraste={altoContraste}
+          setAltoContraste={setAltoContraste}
+          zoomActivado={zoomActivado}
+          setZoomActivado={setZoomActivado}
+          subtitulosCerrados={subtitulosCerrados}
+          setSubtitulosCerrados={setSubtitulosCerrados}
+        />
+
         <div style={{ padding: '20px' }}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={
+              <Dashboard accessibility={{
+                altoContraste,
+                zoomActivado,
+                subtitulosCerrados
+              }} />
+            } />
+
             <Route path="/fuente-alertas" element={<FuenteAlertas />} />
             <Route path="/gestion-voluntarios" element={<GestionVoluntarios />} />
             <Route path="/centro-ayuda" element={<CentroAyuda />} />
