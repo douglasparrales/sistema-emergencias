@@ -72,3 +72,10 @@
   transition: none !important;
 }
 
+/* Oculta el ícono del navegador en campos de contraseña */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-reveal {
+  display: none !important;
+}
+
