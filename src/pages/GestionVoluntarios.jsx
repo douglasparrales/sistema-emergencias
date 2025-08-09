@@ -1,16 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
+import { db } from "../firebase"; // Ajusta la ruta según tu proyecto
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+} from "firebase/firestore";
 
 const zonasDisponibles = ["Norte", "Sur", "Centro", "Este", "Oeste"];
 
 const GestionVoluntarios = () => {
-  // Estados campos
+  // Estados para campos
   const [nombre, setNombre] = useState(localStorage.getItem("borradorNombre") || "");
   const [telefono, setTelefono] = useState(localStorage.getItem("borradorTelefono") || "");
   const [zona, setZona] = useState(localStorage.getItem("borradorZona") || "");
   const [password, setPassword] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
 
-  // Validación
+  // Validaciones
   const [errores, setErrores] = useState({});
   const [registroExitoso, setRegistroExitoso] = useState(false);
   const [confirmarGuardar, setConfirmarGuardar] = useState(false);
@@ -20,10 +29,10 @@ const GestionVoluntarios = () => {
   // Lista voluntarios
   const [voluntarios, setVoluntarios] = useState([]);
 
-  // Ref para detectar cambios y controlar abandono sin guardar
+  // Ref para controlar cambios sin guardar
   const cambiosSinGuardar = useRef(false);
 
-  // Detectar cambios para aviso abandono
+  // Detectar cambios para aviso al salir
   useEffect(() => {
     cambiosSinGuardar.current =
       nombre !== "" || telefono !== "" || zona !== "" || password !== "";
@@ -47,7 +56,7 @@ const GestionVoluntarios = () => {
     localStorage.setItem("borradorZona", zona);
   }, [nombre, telefono, zona]);
 
-  // Validar campos (en tiempo real y al enviar)
+  // Validar campos en tiempo real
   useEffect(() => {
     const nuevosErrores = {};
 
@@ -57,7 +66,8 @@ const GestionVoluntarios = () => {
 
     if (!telefono.trim()) nuevosErrores.telefono = "El teléfono es obligatorio";
     else if (!/^\d{10,15}$/.test(telefono))
-      nuevosErrores.telefono = "El teléfono debe tener entre 10 y 15 dígitos numéricos";
+      nuevosErrores.telefono =
+        "El teléfono debe tener entre 10 y 15 dígitos numéricos";
 
     if (!zona) nuevosErrores.zona = "Seleccione una zona";
 
@@ -78,7 +88,21 @@ const GestionVoluntarios = () => {
     setFortalezaPass(fuerza);
   }, [password]);
 
-  // Manejo de registro - con confirmación visual antes de guardar
+  // Cargar voluntarios de Firestore en tiempo real
+  useEffect(() => {
+    const voluntariosRef = collection(db, "voluntarios");
+    const unsubscribe = onSnapshot(voluntariosRef, (snapshot) => {
+      const lista = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setVoluntarios(lista);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Manejo de envío con confirmación
   const manejarEnviar = (e) => {
     e.preventDefault();
     if (Object.keys(errores).length > 0) {
@@ -88,35 +112,43 @@ const GestionVoluntarios = () => {
     setConfirmarGuardar(true);
   };
 
-  // Confirmar guardar voluntario
-  const confirmarYGuardar = () => {
+  // Confirmar y guardar voluntario en Firestore
+  const confirmarYGuardar = async () => {
     setConfirmarGuardar(false);
     setErrorDuplicado("");
 
-    // Verificar si ya existe un voluntario con el mismo nombre y teléfono
-    const existe = voluntarios.some(
-      (v) =>
-        v.nombre.toLowerCase() === nombre.trim().toLowerCase() &&
-        v.telefono === telefono.trim()
-    );
-    if (existe) {
-      setErrorDuplicado("El voluntario con este nombre y teléfono ya está registrado.");
-      return;
+    try {
+      const voluntariosRef = collection(db, "voluntarios");
+      const q = query(
+        voluntariosRef,
+        where("nombre", "==", nombre.trim()),
+        where("telefono", "==", telefono.trim())
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        setErrorDuplicado(
+          "El voluntario con este nombre y teléfono ya está registrado."
+        );
+        return;
+      }
+
+      await addDoc(voluntariosRef, {
+        nombre: nombre.trim(),
+        telefono: telefono.trim(),
+        zona,
+        creadoEn: new Date(),
+      });
+
+      setRegistroExitoso(true);
+      limpiarFormulario();
+    } catch (error) {
+      console.error("Error guardando voluntario en Firestore:", error);
+      alert("Ocurrió un error al guardar el voluntario.");
     }
-
-    const nuevoVoluntario = {
-      id: Date.now(),
-      nombre: nombre.trim(),
-      telefono: telefono.trim(),
-      zona,
-    };
-
-    setVoluntarios((prev) => [...prev, nuevoVoluntario]);
-    setRegistroExitoso(true);
-    limpiarFormulario();
   };
 
-  // Limpiar formulario y borrador
+  // Limpiar formulario y borrar borradores
   const limpiarFormulario = () => {
     setNombre("");
     setTelefono("");
@@ -139,11 +171,14 @@ const GestionVoluntarios = () => {
       }}
     >
       <header style={{ textAlign: "center", marginBottom: "2rem" }}>
-        <h2 style={{ fontSize: "2rem", color: "#b71c1c", marginBottom: "0.5rem" }}>
+        <h2
+          style={{ fontSize: "2rem", color: "#b71c1c", marginBottom: "0.5rem" }}
+        >
           Gestión de Voluntarios
         </h2>
         <p style={{ color: "#555" }}>
-          Registra a los voluntarios disponibles para actuar en situaciones de emergencia y organiza mejor su participación en cada zona.
+          Registra a los voluntarios disponibles para actuar en situaciones de
+          emergencia y organiza mejor su participación en cada zona.
         </p>
       </header>
 
@@ -164,11 +199,18 @@ const GestionVoluntarios = () => {
           aria-describedby="descDatosPersonales"
         >
           <legend
-            style={{ fontWeight: "bold", marginBottom: "0.5rem", fontSize: "1.1rem" }}
+            style={{
+              fontWeight: "bold",
+              marginBottom: "0.5rem",
+              fontSize: "1.1rem",
+            }}
           >
             Datos Personales
           </legend>
-          <p id="descDatosPersonales" style={{ fontSize: "0.875rem", color: "#555" }}>
+          <p
+            id="descDatosPersonales"
+            style={{ fontSize: "0.875rem", color: "#555" }}
+          >
             Información básica para identificar al voluntario.
           </p>
 
@@ -211,11 +253,18 @@ const GestionVoluntarios = () => {
           aria-describedby="descContacto"
         >
           <legend
-            style={{ fontWeight: "bold", marginBottom: "0.5rem", fontSize: "1.1rem" }}
+            style={{
+              fontWeight: "bold",
+              marginBottom: "0.5rem",
+              fontSize: "1.1rem",
+            }}
           >
             Contacto
           </legend>
-          <p id="descContacto" style={{ fontSize: "0.875rem", color: "#555" }}>
+          <p
+            id="descContacto"
+            style={{ fontSize: "0.875rem", color: "#555" }}
+          >
             Información para contactar al voluntario.
           </p>
 
@@ -296,11 +345,18 @@ const GestionVoluntarios = () => {
           aria-describedby="descCredenciales"
         >
           <legend
-            style={{ fontWeight: "bold", marginBottom: "0.5rem", fontSize: "1.1rem" }}
+            style={{
+              fontWeight: "bold",
+              marginBottom: "0.5rem",
+              fontSize: "1.1rem",
+            }}
           >
             Credenciales
           </legend>
-          <p id="descCredenciales" style={{ fontSize: "0.875rem", color: "#555" }}>
+          <p
+            id="descCredenciales"
+            style={{ fontSize: "0.875rem", color: "#555" }}
+          >
             Seguridad para acceso y edición.
           </p>
 
@@ -330,7 +386,9 @@ const GestionVoluntarios = () => {
             <button
               type="button"
               onClick={() => setMostrarPassword((prev) => !prev)}
-              aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              aria-label={
+                mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+              }
               style={{
                 position: "absolute",
                 right: "0.5rem",
@@ -480,12 +538,7 @@ const GestionVoluntarios = () => {
             focusable="false"
             style={{ color: "#3c763d" }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={3}
-              d="M5 13l4 4L19 7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
           Voluntario guardado con éxito 🎉
         </div>
@@ -582,7 +635,9 @@ const GestionVoluntarios = () => {
         aria-label="Lista de voluntarios registrados"
         style={{ marginTop: "2rem" }}
       >
-        <h3 style={{ marginBottom: "1rem", color: "#333" }}>📋 Voluntarios Registrados</h3>
+        <h3 style={{ marginBottom: "1rem", color: "#333" }}>
+          📋 Voluntarios Registrados
+        </h3>
         {voluntarios.length === 0 ? (
           <p style={{ color: "#777" }}>Aún no se han registrado voluntarios.</p>
         ) : (
@@ -604,9 +659,8 @@ const GestionVoluntarios = () => {
                   boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                 }}
               >
-                <strong>{v.nombre}</strong> &nbsp; | &nbsp;
-                Tel: {v.telefono} &nbsp; | &nbsp;
-                Zona: <span style={{ color: "#b71c1c" }}>{v.zona}</span>
+                <strong>{v.nombre}</strong> &nbsp; | &nbsp; Tel: {v.telefono} &nbsp; | &nbsp; Zona:{" "}
+                <span style={{ color: "#b71c1c" }}>{v.zona}</span>
               </li>
             ))}
           </ul>

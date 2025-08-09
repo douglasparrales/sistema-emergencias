@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { auth, provider } from './firebase';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import FuenteAlertas from './pages/FuenteAlertas';
@@ -15,13 +18,32 @@ const App = () => {
   const [zoomActivado, setZoomActivado] = useState(false);
   const [subtitulosCerrados, setSubtitulosCerrados] = useState(false);
 
+  // Detectar si hay usuario logueado (persistencia)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (usuario) => {
+      setUsuarioLogueado(usuario || null);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const handleLogin = (usuario) => {
-    setUsuarioLogueado(usuario);
+  // Iniciar sesión con Google
+  const handleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      setUsuarioLogueado(result.user);
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+    }
   };
 
-  const handleLogout = () => {
-    setUsuarioLogueado(null);
+  // Cerrar sesión
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUsuarioLogueado(null);
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
   };
 
   return (
@@ -52,7 +74,6 @@ const App = () => {
                 subtitulosCerrados
               }} />
             } />
-
             <Route path="/fuente-alertas" element={<FuenteAlertas />} />
             <Route path="/gestion-voluntarios" element={<GestionVoluntarios />} />
             <Route path="/centro-ayuda" element={<CentroAyuda />} />

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Login from '../pages/Login';
 import './Navbar.css';
-import { Accessibility } from "lucide-react";
+import { Accessibility, Home, Bell, Users, HelpCircle, MapPin } from "lucide-react";
 
 const Navbar = ({ usuario, onLogin, onLogout, toggleAccMenu }) => {
   const location = useLocation();
@@ -18,22 +18,50 @@ const Navbar = ({ usuario, onLogin, onLogout, toggleAccMenu }) => {
     setShowLogin(false);
   };
 
+  // Para mostrar nombre o email si está disponible
+  const mostrarUsuario = usuario?.displayName || usuario?.email || "Usuario";
+
   return (
     <>
       <nav className="navbar">
         <h2>Sistema de Emergencias</h2>
         <ul className="nav-links">
-          <li><Link className={isActive('/')} to="/">Inicio</Link></li>
-          <li><Link className={isActive('/fuente-alertas')} to="/fuente-alertas">Fuente de Alertas</Link></li>
-          <li><Link className={isActive('/gestion-voluntarios')} to="/gestion-voluntarios">Gestión Voluntarios</Link></li>
-          <li><Link className={isActive('/centro-ayuda')} to="/centro-ayuda">Centro de Ayuda</Link></li>
-          <li><Link className={isActive('/zonas-seguras')} to="/zonas-seguras">Mapa de Zonas Seguras</Link></li>
+          <li>
+            <Link className={isActive('/')} to="/">
+              <Home size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+              Inicio
+            </Link>
+          </li>
+          <li>
+            <Link className={isActive('/fuente-alertas')} to="/fuente-alertas">
+              <Bell size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+              Fuente de Alertas
+            </Link>
+          </li>
+          <li>
+            <Link className={isActive('/gestion-voluntarios')} to="/gestion-voluntarios">
+              <Users size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+              Voluntarios
+            </Link>
+          </li>
+          <li>
+            <Link className={isActive('/centro-ayuda')} to="/centro-ayuda">
+              <HelpCircle size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+              Centro de Ayuda
+            </Link>
+          </li>
+          <li>
+            <Link className={isActive('/zonas-seguras')} to="/zonas-seguras">
+              <MapPin size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+              Mapa de Zonas Seguras
+            </Link>
+          </li>
         </ul>
 
         <div className="nav-login-section">
           {usuario ? (
             <>
-              <span className="nav-usuario">Hola, {usuario}</span>
+              <span className="nav-usuario">Hola, {mostrarUsuario}</span>
               <button onClick={onLogout} className="btn-logout">Cerrar sesión</button>
             </>
           ) : (
@@ -56,7 +84,7 @@ const Navbar = ({ usuario, onLogin, onLogout, toggleAccMenu }) => {
           justifyContent: "center",
           cursor: "pointer",
           position: "fixed",
-          bottom: "20px",  // Lo colocamos abajo para no tapar menú (que está a bottom: 80px)
+          bottom: "20px",
           right: "20px",
           zIndex: 1100,
           boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
